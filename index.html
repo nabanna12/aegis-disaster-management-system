@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AEGIS — Disaster Management System</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-layer">
+    <div class="grid-overlay"></div>
+    <canvas id="particleCanvas"></canvas>
+    <div class="scan-line"></div>
+  </div>
+
+  <!-- Boot Screen -->
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-content">
+      <div class="boot-logo">
+        <div class="logo-hex">
+          <svg viewBox="0 0 100 100"><polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke="currentColor" stroke-width="3"/><polygon points="50,18 82,35.5 82,64.5 50,82 18,64.5 18,35.5" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/><text x="50" y="57" text-anchor="middle" font-size="22" font-weight="900" fill="currentColor" font-family="Orbitron">A</text></svg>
+        </div>
+        <div class="boot-title">AEGIS</div>
+        <div class="boot-sub">Advanced Emergency & Global Incident System</div>
+      </div>
+      <div class="boot-progress">
+        <div class="boot-bar"><div class="boot-fill" id="bootFill"></div></div>
+        <div class="boot-status" id="bootStatus">Initializing core systems...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app" id="mainApp" style="display:none">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-mark">
+          <svg viewBox="0 0 60 60" width="36" height="36"><polygon points="30,3 57,17 57,43 30,57 3,43 3,17" fill="none" stroke="var(--accent)" stroke-width="2.5"/><text x="30" y="37" text-anchor="middle" font-size="16" font-weight="900" fill="var(--accent)" font-family="Orbitron">A</text></svg>
+        </div>
+        <div>
+          <div class="logo-text">AEGIS</div>
+          <div class="logo-version">v3.7.2 — OPERATIONAL</div>
+        </div>
+      </div>
+
+      <div class="system-status">
+        <div class="status-dot online"></div>
+        <span>All Systems Nominal</span>
+      </div>
+
+      <nav class="nav-menu">
+        <a class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+          <span class="nav-icon">⬡</span> Command Center
+        </a>
+        <a class="nav-item" data-page="incidents" onclick="showPage('incidents')">
+          <span class="nav-icon">◈</span> Active Incidents
+          <span class="nav-badge" id="incidentBadge">3</span>
+        </a>
+        <a class="nav-item" data-page="resources" onclick="showPage('resources')">
+          <span class="nav-icon">◉</span> Resources
+        </a>
+        <a class="nav-item" data-page="map" onclick="showPage('map')">
+          <span class="nav-icon">◎</span> Threat Map
+        </a>
+        <a class="nav-item" data-page="teams" onclick="showPage('teams')">
+          <span class="nav-icon">◇</span> Response Teams
+        </a>
+        <a class="nav-item" data-page="alerts" onclick="showPage('alerts')">
+          <span class="nav-icon">△</span> Alert System
+        </a>
+        <a class="nav-item" data-page="reports" onclick="showPage('reports')">
+          <span class="nav-icon">▣</span> Reports & Analytics
+        </a>
+        <a class="nav-item" data-page="inventory" onclick="showPage('inventory')">
+          <span class="nav-icon">▦</span> Inventory
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">CMD</div>
+          <div>
+            <div class="user-name">Commander Singh</div>
+            <div class="user-role">LEVEL 5 ACCESS</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+          <div class="page-breadcrumb" id="breadcrumb">Command Center</div>
+        </div>
+        <div class="topbar-center">
+          <div class="threat-level-bar">
+            <span class="tl-label">THREAT LEVEL</span>
+            <div class="tl-indicators">
+              <div class="tl-seg active tl-green"></div>
+              <div class="tl-seg active tl-yellow"></div>
+              <div class="tl-seg tl-orange"></div>
+              <div class="tl-seg tl-red"></div>
+            </div>
+            <span class="tl-text" id="threatText">ELEVATED</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="clock" id="mainClock">--:--:--</div>
+          <button class="alert-btn" onclick="showPage('alerts')">
+            <span class="alert-pulse"></span> ALERTS <span class="alert-count">5</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Pages -->
+      <div class="page-container">
+
+        <!-- DASHBOARD PAGE -->
+        <div class="page active" id="page-dashboard">
+          <div class="page-header">
+            <h1 class="page-title">COMMAND CENTER</h1>
+            <div class="page-subtitle">Real-time situational awareness — <span id="dashDate"></span></div>
+          </div>
+
+          <!-- KPI Strip -->
+          <div class="kpi-strip">
+            <div class="kpi-card critical">
+              <div class="kpi-icon">🔴</div>
+              <div class="kpi-value counter" data-target="3">0</div>
+              <div class="kpi-label">CRITICAL</div>
+              <div class="kpi-sub">Active Incidents</div>
+            </div>
+            <div class="kpi-card warning">
+              <div class="kpi-icon">🟡</div>
+              <div class="kpi-value counter" data-target="12">0</div>
+              <div class="kpi-label">WARNING</div>
+              <div class="kpi-sub">Monitored Zones</div>
+            </div>
+            <div class="kpi-card teams">
+              <div class="kpi-icon">🔵</div>
+              <div class="kpi-value counter" data-target="28">0</div>
+              <div class="kpi-label">DEPLOYED</div>
+              <div class="kpi-sub">Response Units</div>
+            </div>
+            <div class="kpi-card safe">
+              <div class="kpi-icon">🟢</div>
+              <div class="kpi-value counter" data-target="1482">0</div>
+              <div class="kpi-label">EVACUATED</div>
+              <div class="kpi-sub">Civilians Safe</div>
+            </div>
+            <div class="kpi-card resources">
+              <div class="kpi-icon">⚡</div>
+              <div class="kpi-value counter" data-target="94">0</div>
+              <div class="kpi-label">RESOURCES</div>
+              <div class="kpi-sub">% Availability</div>
+            </div>
+          </div>
+
+          <!-- Dashboard Grid -->
+          <div class="dashboard-grid">
+
+            <!-- Live Feed -->
+            <div class="panel live-feed-panel">
+              <div class="panel-header">
+                <span class="panel-title">⚡ LIVE INCIDENT FEED</span>
+                <span class="live-dot">LIVE</span>
+              </div>
+              <div class="live-feed" id="liveFeed"></div>
+            </div>
+
+            <!-- Mini Map -->
+            <div class="panel mini-map-panel">
+              <div class="panel-header">
+                <span class="panel-title">◎ THREAT MAP OVERVIEW</span>
+                <button class="panel-btn" onclick="showPage('map')">EXPAND →</button>
+              </div>
+              <div class="mini-map-container">
+                <canvas id="miniMapCanvas" width="500" height="300"></canvas>
+                <div class="map-legend">
+                  <span class="leg-item"><span class="leg-dot red"></span>Critical</span>
+                  <span class="leg-item"><span class="leg-dot yellow"></span>Warning</span>
+                  <span class="leg-item"><span class="leg-dot blue"></span>Deployed</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resource Gauges -->
+            <div class="panel gauges-panel">
+              <div class="panel-header"><span class="panel-title">◉ RESOURCE STATUS</span></div>
+              <div class="gauges-grid">
+                <div class="gauge-item">
+                  <canvas class="gauge-canvas" data-value="78" data-color="#00f5d4" width="100" height="100"></canvas>
+                  <div class="gauge-label">Personnel</div>
+                  <div class="gauge-value">78%</div>
+                </div>
+                <div class="gauge-item">
+                  <canvas class="gauge-canvas" data-value="62" data-color="#f7b731" width="100" height="100"></canvas>
+                  <div class="gauge-label">Vehicles</div>
+                  <div class="gauge-value">62%</div>
+                </div>
+                <div class="gauge-item">
+                  <canvas class="gauge-canvas" data-value="91" data-color="#45aaf2" width="100" height="100"></canvas>
+                  <div class="gauge-label">Medical</div>
+                  <div class="gauge-value">91%</div>
+                </div>
+                <div class="gauge-item">
+                  <canvas class="gauge-canvas" data-value="54" data-color="#fd9644" width="100" height="100"></canvas>
+                  <div class="gauge-label">Supplies</div>
+                  <div class="gauge-value">54%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div class="panel alerts-panel">
+              <div class="panel-header">
+                <span class="panel-title">△ RECENT ALERTS</span>
+                <button class="panel-btn" onclick="showPage('alerts')">VIEW ALL →</button>
+              </div>
+              <div class="alerts-list" id="dashAlerts"></div>
+            </div>
+
+            <!-- Teams Status -->
+            <div class="panel teams-status-panel">
+              <div class="panel-header"><span class="panel-title">◇ TEAM DEPLOYMENT STATUS</span></div>
+              <div class="teams-status-list" id="dashTeams"></div>
+            </div>
+
+            <!-- Weather Widget -->
+            <div class="panel weather-panel">
+              <div class="panel-header"><span class="panel-title">☁ ENVIRONMENTAL CONDITIONS</span></div>
+              <div class="weather-grid" id="weatherGrid"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- INCIDENTS PAGE -->
+        <div class="page" id="page-incidents">
+          <div class="page-header">
+            <h1 class="page-title">ACTIVE INCIDENTS</h1>
+            <div class="page-actions">
+              <button class="btn btn-primary" onclick="openModal('newIncident')">+ NEW INCIDENT</button>
+            </div>
+          </div>
+          <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterIncidents('all', this)">ALL</button>
+            <button class="filter-btn" onclick="filterIncidents('critical', this)">CRITICAL</button>
+            <button class="filter-btn" onclick="filterIncidents('high', this)">HIGH</button>
+            <button class="filter-btn" onclick="filterIncidents('medium', this)">MEDIUM</button>
+            <button class="filter-btn" onclick="filterIncidents('low', this)">LOW</button>
+            <div class="search-box">
+              <input type="text" placeholder="Search incidents..." id="incidentSearch" oninput="searchIncidents(this.value)">
+            </div>
+          </div>
+          <div class="incidents-grid" id="incidentsGrid"></div>
+        </div>
+
+        <!-- RESOURCES PAGE -->
+        <div class="page" id="page-resources">
+          <div class="page-header">
+            <h1 class="page-title">RESOURCE MANAGEMENT</h1>
+            <button class="btn btn-primary" onclick="openModal('addResource')">+ ADD RESOURCE</button>
+          </div>
+          <div class="resources-categories" id="resourcesContent"></div>
+        </div>
+
+        <!-- MAP PAGE -->
+        <div class="page" id="page-map">
+          <div class="page-header">
+            <h1 class="page-title">THREAT MAP</h1>
+            <div class="map-controls">
+              <button class="btn btn-sm" onclick="mapZoom(1.2)">+ ZOOM</button>
+              <button class="btn btn-sm" onclick="mapZoom(0.8)">− ZOOM</button>
+              <button class="btn btn-sm" onclick="resetMap()">⟳ RESET</button>
+            </div>
+          </div>
+          <div class="map-wrapper">
+            <canvas id="mainMapCanvas" width="900" height="550"></canvas>
+            <div class="map-sidebar">
+              <div class="map-legend-panel">
+                <div class="panel-header"><span class="panel-title">LEGEND</span></div>
+                <div class="map-legend-items">
+                  <div class="ml-item"><span class="ml-dot fire"></span> Wildfire</div>
+                  <div class="ml-item"><span class="ml-dot flood"></span> Flood</div>
+                  <div class="ml-item"><span class="ml-dot earthquake"></span> Earthquake</div>
+                  <div class="ml-item"><span class="ml-dot storm"></span> Storm</div>
+                  <div class="ml-item"><span class="ml-dot team"></span> Response Team</div>
+                  <div class="ml-item"><span class="ml-dot shelter"></span> Shelter</div>
+                </div>
+              </div>
+              <div class="map-incidents-list panel">
+                <div class="panel-header"><span class="panel-title">INCIDENT MARKERS</span></div>
+                <div id="mapIncidentsList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEAMS PAGE -->
+        <div class="page" id="page-teams">
+          <div class="page-header">
+            <h1 class="page-title">RESPONSE TEAMS</h1>
+            <button class="btn btn-primary" onclick="openModal('addTeam')">+ ADD TEAM</button>
+          </div>
+          <div class="teams-grid" id="teamsGrid"></div>
+        </div>
+
+        <!-- ALERTS PAGE -->
+        <div class="page" id="page-alerts">
+          <div class="page-header">
+            <h1 class="page-title">ALERT SYSTEM</h1>
+            <button class="btn btn-primary btn-danger" onclick="openModal('broadcastAlert')">📡 BROADCAST ALERT</button>
+          </div>
+          <div class="alerts-dashboard" id="alertsDashboard"></div>
+        </div>
+
+        <!-- REPORTS PAGE -->
+        <div class="page" id="page-reports">
+          <div class="page-header">
+            <h1 class="page-title">REPORTS & ANALYTICS</h1>
+            <button class="btn btn-primary" onclick="exportReport()">⬇ EXPORT REPORT</button>
+          </div>
+          <div class="reports-grid" id="reportsGrid"></div>
+        </div>
+
+        <!-- INVENTORY PAGE -->
+        <div class="page" id="page-inventory">
+          <div class="page-header">
+            <h1 class="page-title">INVENTORY MANAGEMENT</h1>
+            <button class="btn btn-primary" onclick="openModal('addInventory')">+ ADD ITEM</button>
+          </div>
+          <div class="inventory-container" id="inventoryContainer"></div>
+        </div>
+
+      </div><!-- /page-container -->
+    </main>
+  </div><!-- /app -->
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal" id="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Title</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
